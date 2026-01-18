@@ -1,97 +1,72 @@
-# QuickNote App
+# QuickNote Desktop 📝
 
-A simple, functional note-taking application built with React that allows you to create, edit, and delete notes with ease.
+A sleek, high-performance note-taking application designed for desktop web browsers. Built with React and Vite, it focuses on a clean user experience.
 
 ## 🔗 Live Demo
-
-**[View Live Demo](https://gabrielvizcainomusiced-coder.github.io/QuickNote-App/)**
-
-## ✨ Features
-
-- **Create Notes** - Add new notes with a title and content
-- **Edit Notes** - Modify existing notes anytime
-- **Delete Notes** - Remove notes you no longer need
-- **Responsive Design** - Adapts beautifully to any screen size
-- **Dynamic Layout** - Notes automatically adjust height based on content length
-- **Persistent Footer** - Footer stays at the bottom of the page regardless of content
-
-## 🛠️ Tech Stack
-
-- **React** - UI library for building the interface
-- **Vite** - Fast build tool and development server
-- **JavaScript** - Core programming language
-- **CSS** - Styling and responsive design
-
-## 🚀 Getting Started
-
-Follow these steps to run the project locally:
-
-### Prerequisites
-
-Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/gabrielvizcainomusiced-coder/QuickNote-App.git
-   ```
-
-2. **Navigate to the project directory**
-   ```bash
-   cd QuickNote-App
-   ```
-
-3. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open in browser**
-   
-   The app will be running at `http://localhost:5173` (or the port shown in your terminal)
-
-## 📦 Build for Production
-
-To create a production-ready build:
-
-```bash
-npm run build
-```
-
-The optimized files will be in the `dist` folder.
-
-## 📁 Project Structure
-
-```
-QuickNote-App/
-├── hooks/          # Custom React hooks
-├── src/            # Source files
-│   ├── components/ # React components
-│   └── styles/     # CSS stylesheets
-├── utils/          # Utility functions
-├── index.html      # Entry HTML file
-└── package.json    # Dependencies and scripts
-```
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
-## 👤 Author
-
-**Gabriel Vizcaino**
-- GitHub: [@gabrielvizcainomusiced-coder](https://github.com/gabrielvizcainomusiced-coder)
+[🚀 View Live Demo](https://gabrielvizcainomusiced-coder.github.io/QuickNote-Desktop/)
 
 ---
 
+## ✨ Features
+* **Create Notes** – Capture thoughts instantly with a title and content.
+* **Edit & Refine** – Seamlessly update existing notes.
+* **Delete with Ease** – Keep your workspace clean by removing old notes.
+* **Persistent Storage** – Your notes stay saved even if you refresh the page.
+* **Responsive Layout** – Optimized for desktop and tablet viewports.
+* **Dynamic UI** – Notes use a masonry-style adjustment based on content length.
 
+---
+
+## 🛠️ Tech Stack
+* **React 19** – Modern UI library for a component-based architecture.
+* **Vite** – Ultra-fast development and optimized production bundling.
+* **JavaScript (ES6+)** – Clean, functional logic.
+* **CSS3** – Custom styling with Flexbox and Grid for a modern look.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
+
+### Installation
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/gabrielvizcainomusiced-coder/QuickNote-Desktop.git](https://github.com/gabrielvizcainomusiced-coder/QuickNote-Desktop.git)
+Navigate to the project directory
+
+Bash
+
+cd QuickNote-Desktop
+Install dependencies
+
+Bash
+
+npm install
+Start the development server
+
+Bash
+
+npm run dev
+📁 Project Structure
+Plaintext
+
+QuickNote-Desktop/
+├── .github/workflows/ # Automated deployment settings
+├── hooks/             # Custom React hooks (useNotes)
+├── src/               # Main application logic
+│   ├── components/    # Modular UI elements (Header, NoteList, etc.)
+│   ├── main.jsx       # React entry point
+│   └── styles.css     # Main application styles
+├── utils/             # LocalStorage & helper logic
+├── index.html         # Main entry page
+├── vite.config.js     # Build & Base Path configurations
+└── package.json       # Project dependencies & scripts
+👤 Author
+Gabriel Vizcaino
+
+GitHub: @gabrielvizcainomusiced-coder
+
+📝 License
+This project is open source and available under the MIT License.
