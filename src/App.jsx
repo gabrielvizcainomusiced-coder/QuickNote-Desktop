@@ -6,15 +6,14 @@ import NoteList from "./components/NoteList";
 
 function App() {
 
-  const [notes, setNotes] = useState(() => {
-    const savedNotes = localStorage.getItem('quicknotes');
-    return savedNotes ? JSON.parse(savedNotes) : [];
-  });
+const [notes, setNotes] = useState(() => {
+  const savedNotes = localStorage.getItem('quicknote-desktop-v1'); 
+  return savedNotes ? JSON.parse(savedNotes) : [];
+});
 
-  // Save notes to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('quicknotes', JSON.stringify(notes));
-  }, [notes]);
+useEffect(() => {
+  localStorage.setItem('quicknote-desktop-v1', JSON.stringify(notes));
+}, [notes]);
 
   function addNote(newNote) {
     const noteWithId = { ...newNote, id: Date.now() };
