@@ -9,7 +9,7 @@
 
 ## Project Overview
 
-QuickNote Desktop is a React-based note-taking application designed as a quick-note / sticky note tool. It has a dual-mode architecture — it can run as a standalone client-side app (localStorage) or connect to a REST API backend with PostgreSQL.
+QuickNote Desktop is a React-based sticky note / quick note application. It has a dual-mode architecture — it can run as a standalone client-side app (localStorage) or connect to a REST API backend with PostgreSQL.
 
 ### Key Feature: Dual-Mode Architecture
 - **Demo Mode (localStorage):** No backend needed, perfect for GitHub Pages
@@ -21,7 +21,7 @@ This demonstrates: environment-based configuration, multiple deployment strategi
 
 ## Tech Stack
 
-- **React 19** — Hooks-based UI (`useState`, `useEffect`, custom hooks)
+- **React 19** — Hooks-based UI (`useState`, `useEffect`)
 - **Vite** — Dev server and production bundler
 - **JavaScript (ES6+)** — Async/await, modules, destructuring
 - **CSS3** — Custom Flexbox/Grid (no framework — intentional)
@@ -45,24 +45,24 @@ This demonstrates: environment-based configuration, multiple deployment strategi
 QuickNote-Desktop/
 ├── .github/workflows/
 │   └── deploy.yml              # Auto-deploy to GitHub Pages on push to main
-├── hooks/
-│   └── useNotes.js             # Custom hook — note state and CRUD logic
 ├── src/
 │   ├── components/
 │   │   ├── Header.jsx          # App header
 │   │   ├── Footer.jsx          # App footer
+│   │   ├── BoltIcon.jsx        # SVG icon used in header
 │   │   ├── CreateNote.jsx      # Note creation form (controlled inputs)
 │   │   ├── NoteList.jsx        # CSS Grid container for note cards
-│   │   └── Note.jsx            # Note card — display + inline edit modes
+│   │   ├── NoteItem.jsx        # Note card — display + inline edit toggle
+│   │   └── EditNote.jsx        # Inline edit form inside NoteItem
 │   ├── config/
 │   │   └── api.js              # Reads env vars, exports USE_BACKEND + API_URL
 │   ├── services/
 │   │   └── noteService.js      # Data abstraction — localStorage OR API
 │   ├── App.jsx                 # Root component — owns note state
 │   ├── main.jsx                # React entry point
-│   └── styles.css              # Global styles
+│   └── styles.css              # All styles (no inline styles in components)
 ├── utils/
-│   └── localStorage.js         # localStorage read/write helpers
+│   └── storage.js              # localStorage read/write helpers
 ├── .env.example                # Environment variable template
 ├── .env                        # Local environment (gitignored)
 ├── index.html                  # HTML entry point
@@ -78,9 +78,10 @@ QuickNote-Desktop/
 ```
 App  (owns note state: notes, loading, error)
 ├── Header
-├── CreateNote        (calls App's addNote handler)
+├── CreateNote        (calls App's addNote + onError handlers)
 ├── NoteList
-│   └── Note[]        (calls App's editNote / deleteNote handlers)
+│   └── NoteItem[]    (calls App's editNote / deleteNote handlers)
+│       └── EditNote  (inline edit form, renders inside NoteItem)
 └── Footer
 ```
 
@@ -94,20 +95,17 @@ User Action → Component → noteService → localStorage (demo) OR API (full-s
 
 Switching modes requires zero component changes — only the env var changes.
 
-### Data Flow (Full-Stack Mode)
-1. User action → component event handler
-2. Component calls `noteService` method
-3. `noteService` makes fetch request to API
-4. API returns note data
-5. Component updates React state
-6. React re-renders UI
+### Error Handling Pattern
 
-### Data Flow (Demo Mode)
-1. User action → component event handler
-2. Component calls `noteService` method
-3. `noteService` reads/writes localStorage
-4. Component updates React state
-5. React re-renders UI
+All errors flow through a single `error` state in `App.jsx` and render via the `.error-banner` CSS class. Components surface errors by calling `props.onError(message)` — they never manage error display themselves.
+
+```
+CreateNote validation error → props.onError() → App error state → error-banner UI
+API failure → catch block → setError() → App error state → error-banner UI
+EditNote validation error → local error state → inline .edit-error UI
+```
+
+Note: `EditNote` uses its own local error state since the error needs to appear inline inside the note card, not in the global banner.
 
 ---
 
@@ -130,6 +128,25 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/ap
 - Access via `import.meta.env.VARIABLE_NAME`
 - Boolean env vars are strings — must compare with `=== 'true'`
 - Never store secrets in `VITE_` variables — they're visible in the browser
+- Always restart dev server after editing `.env`
+
+---
+
+## Validation Rules
+
+**CreateNote (frontend):**
+- Both title AND content required (`||` not `&&`)
+- Both must be non-empty after trimming whitespace
+- Errors surface via `props.onError()` → global error banner
+
+**EditNote (frontend):**
+- Same rules apply on save
+- Error renders inline via local `error` state → `.edit-error` class
+
+**Backend enforces:**
+- Title max 255 characters
+- Content max 500 characters (sticky note intent)
+- HTML sanitization (XSS prevention)
 
 ---
 
@@ -137,47 +154,62 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/ap
 
 ```javascript
 class NoteService {
-  async getAllNotes()        // Get all notes
-  async createNote(note)    // Create new note
+  async getAllNotes()         // Get all notes
+  async createNote(note)     // Create new note
   async updateNote(id, note) // Update existing note
-  async deleteNote(id)      // Delete note
+  async deleteNote(id)       // Delete note — returns deleted note in both modes
 }
 
 export default new NoteService(); // Singleton
 ```
-
-**deleteNote** returns the deleted note in both modes (API and localStorage) for consistency.
 
 ---
 
 ## Component Details
 
 ### App.jsx
-- Owns global note state: `notes`, `loading`, `error`
+- Owns global state: `notes`, `loading`, `error`
 - Key functions: `loadNotes`, `addNote`, `editNote`, `deleteNote`
-- Pattern: async state updates with try/catch, immutable array operations
+- Passes `onError={setError}` to `CreateNote` so validation errors use the global banner
+- No inline styles — all styles in `styles.css`
 
 ### CreateNote.jsx
 - Controlled inputs for title and content
-- Clears form after submission
-- Calls parent's `onAdd` handler
+- Validates both fields with `||` (both required)
+- Calls `props.onError()` for validation failures (no `alert()`)
+- Clears form after successful submission
 
 ### NoteList.jsx
 - Receives `notes`, `onDelete`, `onEdit` as props
-- Renders CSS Grid of Note cards
+- Shows `.empty-state` when no notes exist
+- Renders CSS Grid of `NoteItem` cards
 
-### Note.jsx
-- Display mode and inline edit mode (`isEditing` state)
-- Temp state during edit: `editTitle`, `editContent`
-- Delete and edit/save toggle buttons
+### NoteItem.jsx
+- Manages `isEditing` state and `capturedHeight` for smooth layout transitions
+- Captures note body height before switching to edit mode to prevent layout jump
+- Renders `EditNote` when editing, note content when not
+
+### EditNote.jsx
+- Temp state (`tempNote`) holds edits without mutating parent state
+- Validates both fields before calling `props.onSave()`
+- Shows inline `.edit-error` message on validation failure
+- Cancel discards changes without saving
 
 ---
 
-## Validation (Frontend)
+## CSS Architecture
 
-The frontend does basic non-empty validation before calling `noteService`. The backend enforces the full rules:
-- Title: required, non-empty, max 255 characters
-- Content: required, non-empty, max **500 characters** (sticky note intent)
+All styles live in `styles.css`. No inline styles in any component.
+
+**Key classes:**
+- `.app`, `.content` — layout structure
+- `.notes-container` — CSS Grid for note cards
+- `.note`, `.note-body` — note card styles
+- `.edit-state`, `.edit-title`, `.edit-content`, `.edit-actions` — inline edit styles
+- `.empty-state` — shown when no notes exist
+- `.loading-state` — shown during initial data fetch
+- `.error-banner`, `.error-dismiss` — global error display
+- `.edit-error` — inline validation error in EditNote
 
 ---
 
@@ -213,18 +245,20 @@ git push origin main  # Triggers GitHub Actions deploy
 
 ## Testing Strategy
 
-No automated tests for the frontend — testing effort was focused on the backend (37 tests, 100% coverage). Frontend behavior is best verified manually or via E2E tools.
+No automated tests for the frontend — testing effort was focused on the backend (41 tests, 100% coverage). Frontend behavior is verified manually.
 
 **Future:** React Testing Library for components, Cypress for E2E.
 
 ### Manual Checklist
 
 **Demo Mode:**
-- [ ] Create a note
-- [ ] Edit inline
+- [ ] Create a note (both fields required)
+- [ ] Try submitting with empty title — error banner appears
+- [ ] Try submitting with whitespace-only content — error banner appears
+- [ ] Edit a note inline
+- [ ] Try saving with empty fields — inline error appears
 - [ ] Delete a note
 - [ ] Refresh — notes persist
-- [ ] Incognito — notes start empty
 
 **Full-Stack Mode:**
 - [ ] Backend health: `curl http://localhost:3001/health`
@@ -244,12 +278,6 @@ No automated tests for the frontend — testing effort was focused on the backen
 
 **Env var not taking effect:**
 Restart dev server after editing `.env` (Ctrl+C → `npm run dev`)
-
-**Debug config:**
-```javascript
-console.log('Mode:', import.meta.env.VITE_USE_BACKEND);
-console.log('API:', import.meta.env.VITE_API_URL);
-```
 
 **CORS error / API not responding:**
 ```bash
@@ -277,7 +305,7 @@ Confirm `base: '/QuickNote-Desktop/'` in `vite.config.js`.
 
 ## Future Enhancements
 
-**Near-term:** Loading spinner, delete confirmation dialog, toast notifications, character count in CreateNote form.
+**Near-term:** Character count in CreateNote form, toast notifications instead of error banner.
 
 **Longer-term:** Markdown support, dark mode, note categories/tags, search/filter, drag-and-drop reordering, keyboard shortcuts, export to file.
 
@@ -285,7 +313,20 @@ Confirm `base: '/QuickNote-Desktop/'` in `vite.config.js`.
 
 ## Version History
 
-- **v1.0** (Jan 2026) — Initial release: dual-mode architecture, full CRUD, GitHub Pages deployment, service layer pattern, React 19
+- **v1.1** (Feb 2026) — Bug fixes and cleanup
+  - Fixed validation logic bug (`&&` → `||` in CreateNote)
+  - Added save validation to EditNote
+  - Replaced `alert()` with consistent error banner pattern
+  - Moved all inline styles to CSS
+  - Removed empty dead files (FilterBar.jsx, useNotes.js)
+  - Updated docs to reflect actual file names (NoteItem.jsx, storage.js)
+
+- **v1.0** (Jan 2026) — Initial release
+  - Dual-mode architecture
+  - Full CRUD
+  - GitHub Pages deployment
+  - Service layer pattern
+  - React 19
 
 ---
 
@@ -294,10 +335,13 @@ Confirm `base: '/QuickNote-Desktop/'` in `vite.config.js`.
 When working on this project:
 1. **Check environment mode first** — localStorage or API?
 2. **Never bypass noteService** — components must not call fetch/localStorage directly
-3. **Follow existing component patterns** — consistent structure throughout
-4. **Content limit is 500 characters** — this is intentional (sticky note / quick note design)
-5. **Update this file** when making architectural changes
-6. **Reference backend Claude.md** for API contract and validation rules
+3. **No inline styles** — all styles belong in `styles.css`
+4. **Error handling pattern** — validation errors in CreateNote use `props.onError()`, EditNote uses local state, API errors use `setError()` in App
+5. **Both fields required** — validation uses `||` not `&&`
+6. **Content limit is 500 characters** — intentional sticky note design
+7. **Actual filenames** — it's `NoteItem.jsx` not `Note.jsx`, and `utils/storage.js` not `utils/localStorage.js`
+8. **Update this file** when making architectural changes
+9. **Reference backend Claude.md** for API contract and validation rules
 
 **Preventing Ralph Wiggum Loops:**
 This file contains all frontend context. Always read it before suggesting changes that might conflict with the dual-mode architecture or established patterns.
