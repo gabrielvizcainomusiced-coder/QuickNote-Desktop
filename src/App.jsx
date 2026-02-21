@@ -10,7 +10,6 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load notes when component mounts
   useEffect(() => {
     loadNotes();
   }, []);
@@ -22,8 +21,8 @@ function App() {
       const data = await noteService.getAllNotes();
       setNotes(data);
     } catch (err) {
-      setError('Failed to load notes. Please try again.');
-      console.error('Error loading notes:', err);
+      setError("Failed to load notes. Please try again.");
+      console.error("Error loading notes:", err);
     } finally {
       setLoading(false);
     }
@@ -34,8 +33,8 @@ function App() {
       const createdNote = await noteService.createNote(newNote);
       setNotes((prevNotes) => [createdNote, ...prevNotes]);
     } catch (err) {
-      setError('Failed to create note. Please try again.');
-      console.error('Error creating note:', err);
+      setError("Failed to create note. Please try again.");
+      console.error("Error creating note:", err);
     }
   }
 
@@ -46,8 +45,8 @@ function App() {
         prevNotes.map((note) => (note.id === id ? updated : note))
       );
     } catch (err) {
-      setError('Failed to update note. Please try again.');
-      console.error('Error updating note:', err);
+      setError("Failed to update note. Please try again.");
+      console.error("Error updating note:", err);
     }
   }
 
@@ -56,8 +55,8 @@ function App() {
       await noteService.deleteNote(id);
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
     } catch (err) {
-      setError('Failed to delete note. Please try again.');
-      console.error('Error deleting note:', err);
+      setError("Failed to delete note. Please try again.");
+      console.error("Error deleting note:", err);
     }
   }
 
@@ -66,13 +65,7 @@ function App() {
       <div className="app">
         <Header />
         <main className="content">
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '2rem',
-            color: '#666'
-          }}>
-            Loading notes...
-          </div>
+          <div className="loading-state">Loading notes...</div>
         </main>
         <Footer />
       </div>
@@ -84,32 +77,14 @@ function App() {
       <Header />
       <main className="content">
         {error && (
-          <div style={{
-            backgroundColor: '#fee',
-            border: '1px solid #fcc',
-            borderRadius: '4px',
-            padding: '1rem',
-            margin: '1rem 0',
-            color: '#c33',
-            textAlign: 'center'
-          }}>
+          <div className="error-banner">
             {error}
-            <button 
-              onClick={() => setError(null)}
-              style={{
-                marginLeft: '1rem',
-                padding: '0.25rem 0.5rem',
-                background: 'white',
-                border: '1px solid #c33',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
+            <button className="error-dismiss" onClick={() => setError(null)}>
               Dismiss
             </button>
           </div>
         )}
-        <CreateNote onAdd={addNote} />
+        <CreateNote onAdd={addNote} onError={setError} />
         <NoteList notes={notes} onDelete={deleteNote} onEdit={editNote} />
       </main>
       <Footer />

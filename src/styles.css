@@ -318,3 +318,43 @@ footer {
     transform: translateY(0);
   }
 }
+
+/* Loading state */
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+/* Error banner */
+.error-banner {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #c33;
+  text-align: center;
+}
+
+.error-dismiss {
+  margin-left: 1rem;
+  padding: 0.25rem 0.5rem;
+  background: white;
+  border: 1px solid #c33;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #c33;
+  font-family: inherit;
+}
+
+.error-dismiss:hover {
+  background-color: #fee;
+}
+
+/* Inline edit validation error */
+.edit-error {
+  color: #c33;
+  font-size: 0.85rem;
+  margin: 0 0 8px 0;
+}

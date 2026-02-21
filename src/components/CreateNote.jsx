@@ -16,10 +16,9 @@ function CreateNote(props) {
 
   function submitNote(event) {
     event.preventDefault();
-    
-    // Validation: don't allow empty notes
-    if (!note.title.trim() && !note.content.trim()) {
-      alert("Please add a title or content to your note!");
+
+    if (!note.title.trim() || !note.content.trim()) {
+      props.onError("Both title and content are required!");
       return;
     }
 
