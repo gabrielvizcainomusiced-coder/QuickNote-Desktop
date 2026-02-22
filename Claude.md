@@ -61,8 +61,6 @@ QuickNote-Desktop/
 │   ├── App.jsx                 # Root component — owns note state
 │   ├── main.jsx                # React entry point
 │   └── styles.css              # All styles (no inline styles in components)
-├── utils/
-│   └── storage.js              # localStorage read/write helpers
 ├── .env.example                # Environment variable template
 ├── .env                        # Local environment (gitignored)
 ├── index.html                  # HTML entry point
@@ -313,13 +311,16 @@ Confirm `base: '/QuickNote-Desktop/'` in `vite.config.js`.
 
 ## Version History
 
+- **v1.2** (Feb 2026) — Codebase assessment cleanup
+  - Removed empty `utils/` folder and `storage.js` (unused)
+  - Props destructuring improvement noted for future refactor
+
 - **v1.1** (Feb 2026) — Bug fixes and cleanup
   - Fixed validation logic bug (`&&` → `||` in CreateNote)
   - Added save validation to EditNote
   - Replaced `alert()` with consistent error banner pattern
   - Moved all inline styles to CSS
   - Removed empty dead files (FilterBar.jsx, useNotes.js)
-  - Updated docs to reflect actual file names (NoteItem.jsx, storage.js)
 
 - **v1.0** (Jan 2026) — Initial release
   - Dual-mode architecture
@@ -339,9 +340,10 @@ When working on this project:
 4. **Error handling pattern** — validation errors in CreateNote use `props.onError()`, EditNote uses local state, API errors use `setError()` in App
 5. **Both fields required** — validation uses `||` not `&&`
 6. **Content limit is 500 characters** — intentional sticky note design
-7. **Actual filenames** — it's `NoteItem.jsx` not `Note.jsx`, and `utils/storage.js` not `utils/localStorage.js`
-8. **Update this file** when making architectural changes
-9. **Reference backend Claude.md** for API contract and validation rules
+7. **Actual component name** — it's `NoteItem.jsx` not `Note.jsx`
+8. **No utils folder** — it was removed, don't recreate it
+9. **Update this file** when making architectural changes
+10. **Reference backend Claude.md** for API contract and validation rules
 
 **Preventing Ralph Wiggum Loops:**
 This file contains all frontend context. Always read it before suggesting changes that might conflict with the dual-mode architecture or established patterns.
